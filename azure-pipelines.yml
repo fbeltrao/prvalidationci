@@ -3,7 +3,7 @@ variables:
   # Indicates whether or not ci label was added to PR
   #prHasCILabel: false
 
-  majorVersion: 1.0
+  majorVersion: 1.1
 
 
 # Define when to run it
