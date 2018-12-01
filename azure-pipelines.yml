@@ -1,16 +1,69 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+name: $(Build.SourceBranchName)_$(Build.Reason)_$(Build.BuildId):$(Rev:.r) # define here how the build will be named
+variables:
+  # Indicates whether or not ci label was added to PR
+  prHasCILabel: false
 
-pool:
-  vmImage: 'Ubuntu 16.04'
+# Define when to run it
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+# On prs against master and dev
+pr:
+  branches:
+    include:
+    - master
+    - dev
+    - v1
+  
+# Run on changes to master or dev
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - dev
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+# Define jobs
+jobs:
+
+# This job is always executed, static validation only
+- job: build_and_unit_test
+  displayName: Add here build and static validation (unit test, code coverage, code analysis, etc)
+  continueOnError: false
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  
+  steps:
+  - bash: echo Build...
+    displayName: 'Add here build'
+
+  - bash: echo run unit tests/coverage/code analysis...
+    displayName: 'Add here unit tests / code coverage / code analysis'
+
+  # Find out if 'fullci' label was added to PR
+  - bash: |
+     echo "Looking for label at https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
+     if curl -s "https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels" | grep '"name": "fullci"'
+     then       
+       echo "##vso[task.setvariable variable=prHasCILabel;isOutput=true]true"
+       echo "fullci label found!"
+     fi
+    displayName: Check for CI label build on PR
+    condition: eq(variables['Build.Reason'], 'PullRequest') # only run step if it is a PR
+    name: checkPrLabel
+
+# This job is executed only on master/dev commits or in PRs that have label 'fullci'
+- job: full_ci
+  displayName: This job runs full ci (whatever that means for you)
+  dependsOn: build_and_unit_test # depends on previous job
+  # conditions to run:
+  #  - master/dev commit
+  #  - pr with 'fullci' label
+  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/dev')), eq(dependencies.build_and_test.outputs['checkPrLabel.prHasCILabel'], true))
+  pool:
+    vmImage: 'Ubuntu 16.04'
+
+  steps:
+  - bash: echo Deploy...
+    displayName: 'Add here deployment'
+
+  - bash: echo run integration tests...
+    displayName: 'Add here integration tests'
