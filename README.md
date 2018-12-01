@@ -4,15 +4,20 @@ This repository demonstrate how to use Azure DevOps pipelines to validate PRs, c
 
 ![Overview](./media/overview.png)
 
-## Scenario
+Pull request validation is a CI pipeline executed whenever a pull request is submitted. Most of the time they run static validation (check for build errors, unit tests, code coverage, code analysis). They can save us a lot of time, by telling the team whether or not a PR changes fulfils the minimum requirements.
 
-Managing an OSS project that does static validation on PR requests. However, team wants to run full ci pipeline including deployment and integration tests if a specific Label is applied to PR.
+Integration tests can be added to PR validation pipelines. They could deploy to a test environment and execute time consuming integration tests. Ideally integration tests on PR validations should be disabled by default. The team however, can opt-in based on PR. Why?
+
+* Do not add barriers/delays to simple changes. It does not make sense to run integration tests if changes are targeting documentation or parts of the code base not covered by integration test
+
+* For security reasons, team must pre-validate external contributed PRs before running in test environment.
+
 
 ## Solution
 
-Solution has two key parts:
+The implemented solution uses GitHub pull request labels to identify whether or not the integration tests should be executed. You can find it in the build definition file [azure-pipeline.yml](https://github.com/fbeltrao/prvalidationci/blob/master/azure-pipelines.yml).
 
-1. For a pipeline started for PR validation, check if it contains "fullci" label
+1. In a pipeline triggered due to a PR, check if it contains "fullci" label. If found we output a variable named `prHasCILabel` with value true.
 
 ```yaml
   # If reason build is started is "PullRequest"
@@ -32,7 +37,7 @@ Solution has two key parts:
     name: checkPrLabel
 ```
 
-2. Define Full CI job that is only executed against master, dev or a PR with "fullci" label (from previous job/step verification)
+2. In integration test pipeline job, use conditions to prevent execution in case pipeline is not building master, dev or a PR with "fullci" label (checking for variable "prHasCILabel" outputted from previous job/step)
 
 ```yaml
 # This job is executed only if:
@@ -49,9 +54,15 @@ Solution has two key parts:
     vmImage: 'Ubuntu 16.04'
 ```
 
+## Re-run PR validation
+
+If the label "fullci" was added later in the process the build can be restarted in Azure DevOps, which in revalidated the PR, updating the checks.
+
+![Rebuilt PR Build](./media/rebuild-pr-build.png)
+
 ## Important:
 
-Currently by default Azure DevOps is overwritting the PR trigger configuration of the yaml. To follow what is defined in the yaml file, change the build configuration the following way:
+Currently by default Azure DevOps is overwriting the PR trigger configuration of the yaml. To follow what is defined in the yaml file, change the build configuration by disabling the "Override YAML Pull Request trigger from here":
 
 ![PR validation setting](./media/pr-devops-build-settings.png)
 
