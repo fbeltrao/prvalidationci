@@ -57,7 +57,7 @@ jobs:
   # conditions to run:
   #  - master/dev commit
   #  - pr with 'fullci' label
-  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/dev')), eq(dependencies.build_and_test.outputs['checkPrLabel.prHasCILabel'], true))
+  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/dev'), eq(dependencies.build_and_test.outputs['checkPrLabel.prHasCILabel'], true))
   pool:
     vmImage: 'Ubuntu 16.04'
 
