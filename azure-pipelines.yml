@@ -28,7 +28,7 @@ trigger:
 jobs:
 
 # This job is always executed, static validation only
-- job: build_and_unit_test
+- job: build_and_static_validation
   displayName: Build and static validation
   continueOnError: false
   pool:
@@ -56,11 +56,11 @@ jobs:
 # This job is executed only on master/dev commits or in PRs that have label 'fullci'
 - job: full_ci
   displayName: Full CI
-  dependsOn: build_and_unit_test # depends on previous job
+  dependsOn: build_and_static_validation # depends on previous job
   # conditions to run:
   #  - master/dev commit
   #  - pr with 'fullci' label
-  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/dev'), eq(dependencies.build_and_test.outputs['checkPrLabel.prHasCILabel'], true))
+  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/dev'), eq(dependencies.build_and_static_validation.outputs['checkPrLabel.prHasCILabel'], true))
   pool:
     vmImage: 'Ubuntu 16.04'
 
