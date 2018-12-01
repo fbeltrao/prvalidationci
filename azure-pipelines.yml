@@ -1,4 +1,4 @@
-name: $(Build.SourceBranchName)_$(Build.Reason)_$(majorVersion).$(Build.BuildId)-$(Rev:.r) # define here how the build will be named
+name: $(Build.SourceBranchName)_$(Build.Reason)_$(majorVersion).$(Build.BuildId)$(Rev:.r) # define here how the build will be named
 variables:
   # Indicates whether or not ci label was added to PR
   prHasCILabel: false
@@ -29,17 +29,17 @@ jobs:
 
 # This job is always executed, static validation only
 - job: build_and_unit_test
-  displayName: Add here build and static validation (unit test, code coverage, code analysis, etc)
+  displayName: Build and static validation
   continueOnError: false
   pool:
     vmImage: 'Ubuntu 16.04'
   
   steps:
   - bash: echo Build...
-    displayName: 'Add here build'
+    displayName: 'Build goes here'
 
   - bash: echo run unit tests/coverage/code analysis...
-    displayName: 'Add here unit tests / code coverage / code analysis'
+    displayName: 'Unit tests / code coverage / code analysis goes here'
 
   # Find out if 'fullci' label was added to PR
   - bash: |
@@ -55,7 +55,7 @@ jobs:
 
 # This job is executed only on master/dev commits or in PRs that have label 'fullci'
 - job: full_ci
-  displayName: This job runs full ci (whatever that means for you)
+  displayName: Full CI
   dependsOn: build_and_unit_test # depends on previous job
   # conditions to run:
   #  - master/dev commit
