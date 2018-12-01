@@ -1,7 +1,10 @@
-name: $(Build.SourceBranchName)_$(Build.Reason)_$(Build.BuildId):$(Rev:.r) # define here how the build will be named
+name: $(Build.SourceBranchName)_$(Build.Reason)_$(majorVersion).$(Build.BuildId)-$(Rev:.r) # define here how the build will be named
 variables:
   # Indicates whether or not ci label was added to PR
   prHasCILabel: false
+
+  majorVersion: 1.0
+
 
 # Define when to run it
 
