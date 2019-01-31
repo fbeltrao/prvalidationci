@@ -5,7 +5,7 @@ variables:
 
 # Define when to run it
 
-# On PRs against master and dev
+# On PRs against master and dev 
 pr:
   branches:
     include:
@@ -31,11 +31,35 @@ jobs:
     vmImage: 'Ubuntu 16.04'
   
   steps:
+  - task: fbeltrao.GitHubPRLabel.custom-build-release-task.GitHubPRLabel@0
+    displayName: Add ci-running label from PR
+    condition: eq(variables['Build.Reason'], 'PullRequest') # only run step if it is a PR
+    inputs:
+      gitHubConnection: 'fbeltrao' 
+      action: 'add'
+      label: 'ci-running'
+
   - bash: echo Build...
     displayName: 'Build goes here'
 
   - bash: echo run unit tests/coverage/code analysis...
     displayName: 'Unit tests / code coverage / code analysis goes here'
+
+  - task: fbeltrao.GitHubPRLabel.custom-build-release-task.GitHubPRLabel@0
+    displayName: Remove ci-passed label from PR
+    condition: eq(variables['Build.Reason'], 'PullRequest') # only run step if it is a PR
+    inputs:
+      gitHubConnection: 'fbeltrao' 
+      action: 'remove'
+      label: 'ci-passed'  
+
+  - task: fbeltrao.GitHubPRLabel.custom-build-release-task.GitHubPRLabel@0
+    displayName: Remove ci-running label from PR
+    condition: eq(variables['Build.Reason'], 'PullRequest') # only run step if it is a PR
+    inputs:
+      gitHubConnection: 'fbeltrao' 
+      action: 'remove'
+      label: 'ci-running'        
 
   # If reason build is started is "PullRequest"
   # Use GitHub API to check if PR has specific label ("fullci")
@@ -72,3 +96,10 @@ jobs:
 
   - bash: echo run integration tests...
     displayName: 'Add here integration tests'
+
+  - task: fbeltrao.GitHubPRLabel.custom-build-release-task.GitHubPRLabel@0
+    condition: eq(variables['Build.Reason'], 'PullRequest') # only run step if it is a PR
+    inputs:
+      gitHubConnection: 'fbeltrao' 
+      action: 'add'
+      label: 'ci-passed'
