@@ -12,7 +12,6 @@ Integration tests can be added to PR validation pipelines. They could deploy to 
 
 * For security reasons, team must pre-validate external contributed PRs before running in test environment.
 
-
 ## Solution
 
 The implemented solution uses GitHub pull request labels to identify whether or not the integration tests should be executed. You can find it in the build definition file [azure-pipeline.yml](https://github.com/fbeltrao/prvalidationci/blob/master/azure-pipelines.yml).
@@ -76,3 +75,9 @@ pr:
     - master
     - dev
 ```
+
+## Adding and removing labels to PR
+
+Using my [GitHubPRLabel task](https://marketplace.visualstudio.com/items?itemName=fbeltrao.GitHubPRLabel&targetId=3456153a-1adb-46c2-af0c-c899f2eac955&utm_source=vstsproduct&utm_medium=ExtHubManageList) to add/remove labels from PRs.
+
+Extension and more information available at https://github.com/fbeltrao/azure-pipeline-github-tasks
